@@ -24,6 +24,20 @@ public class Juego extends javax.swing.JFrame {
 
     }
 
+    public static void main(String args[]) {
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+
+                Juego main = new Juego();
+                main.setLocationRelativeTo(null);
+                main.setVisible(true);
+
+            }
+        });
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -143,7 +157,6 @@ public class Juego extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ventanaAvierta(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_ventanaAvierta
-        
 
         PedirNombre nombre = new PedirNombre(this, rootPaneCheckingEnabled, logicaCliente);
         nombre.setLocationRelativeTo(this);
@@ -162,14 +175,11 @@ public class Juego extends javax.swing.JFrame {
             logicaCliente.pedirFichas(jpFichasDisponibles, jpFichaParaJugar);
         } else {
             JOptionPane.showMessageDialog(rootPane, " Vuelva a entrar");
-           Juego juego= new Juego();
-           juego.setLocationRelativeTo(null);
-           juego.setVisible(true);
+            Juego juego = new Juego();
+            juego.setLocationRelativeTo(null);
+            juego.setVisible(true);
             this.dispose();
         }
-        
-        
-        
 
         pack();
 
