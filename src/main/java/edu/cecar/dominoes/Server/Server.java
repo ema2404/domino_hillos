@@ -1,5 +1,6 @@
 package edu.cecar.dominoes.Server;
 
+import com.sun.security.ntlm.Client;
 import edu.cecar.dominoes.RecursosCompartidos.Ficha;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,6 +34,7 @@ public class Server {
     private int tiempoRestanteEntreEspera = tiempoDeEspera;
     private boolean inicioEspera = false;
     private boolean inicioPartida = false;
+    private int turno = 0;
 
     ArrayList<Ficha> fichasEnMesa = new ArrayList<Ficha>();
 
@@ -93,7 +95,13 @@ public class Server {
 
                             break;
                         case "actualizacionTablero":
-                            actualizarMeza(datos[2]);
+                            actualizarMeza(datos[0], datos[2]);
+                            break;
+                        case "turno":
+                            esMiTurno(datos[0]);
+                            break;
+                        case "paso":
+                            paso();
                             break;
                     }
                 } else {
@@ -108,8 +116,22 @@ public class Server {
 
     }
 
-    private void actualizarMeza(String dato) throws IOException {
-        
+    private void esMiTurno(String nombre) throws IOException {
+
+        if (turno == clientes.indexOf(new Cliente(nombre))) {
+            salida.writeUTF("si");
+        } else {
+            salida.writeUTF("no");
+        }
+
+    }
+    
+    private void paso(){
+        siguienteTurno();
+    }
+
+    private void actualizarMeza(String nombre, String dato) throws IOException {
+
         String resultado = "";
         if (fichasEnMesa.size() > Integer.valueOf(dato)) {
             resultado = "1;";
@@ -120,6 +142,11 @@ public class Server {
         } else {
             resultado = "0;";
         }
+
+        int pos = clientes.indexOf(new Cliente(nombre));
+
+        clientes.get(pos).setActivo(true);
+
         //System.out.println(fichasEnMesa.size());
         //System.out.println(resultado);
         salida.writeUTF(resultado);
@@ -137,10 +164,11 @@ public class Server {
         if (fichasEnMesa.size() <= 0) {
             System.out.println("entro");
 
-            Ficha ficha = new Ficha(partesFicha[1],partesFicha[0]);
+            Ficha ficha = new Ficha(partesFicha[1], partesFicha[0]);
             ficha.setCambioPos(true);
             ficha.setRotacion("90");
             resultado = "90";
+            siguienteTurno();
             fichasEnMesa.add(ficha);
 
             //esta condicion es aplicada solo cuando esta puesta la primera ficha en mesa
@@ -150,23 +178,36 @@ public class Server {
             if (fichasEnMesa.get(posUltima).getNumeroDerecha().equals(partesFicha[0])) {
 
                 Ficha ficha = new Ficha(partesFicha[0], partesFicha[1]);
-                fichasEnMesa.get(posUltima).setIzquierda(true);
+
+                if (fichasEnMesa.get(posUltima).isCambioPos()) {
+                    fichasEnMesa.get(posUltima).setIzquierda(true);
+                } else {
+                    fichasEnMesa.get(posUltima).setDerecha(true);
+                }
+
                 ficha.setIzquierda(true);
                 ficha.setRotacion("-90");
                 resultado = "-90";
                 fichasEnMesa.add(ficha);
+                siguienteTurno();
                 System.out.println("parte correpa: " + partesFicha[0]);
 
                 //evalua la prrmera ficha en mesa por el lado izquierdo para saber si la ficha que envia el cliente concuerda el lado derecho
             } else if (fichasEnMesa.get(posUltima).getNumeroDerecha().equals(partesFicha[1])) {
-                
-            Ficha ficha = new Ficha(partesFicha[0],partesFicha[1]);
-            fichasEnMesa.get(posUltima).setIzquierda(true);
-            
+
+                Ficha ficha = new Ficha(partesFicha[0], partesFicha[1]);
+
+                if (fichasEnMesa.get(posUltima).isCambioPos()) {
+                    fichasEnMesa.get(posUltima).setIzquierda(true);
+                } else {
+                    fichasEnMesa.get(posUltima).setDerecha(true);
+                }
+
                 ficha.setDerecha(true);
                 ficha.setRotacion("90");
                 resultado = "90";
                 fichasEnMesa.add(ficha);
+                siguienteTurno();
                 System.out.println("parte correpa: " + partesFicha[1]);
             } else {
                 System.out.println("ficha no se puede jugar");
@@ -187,6 +228,7 @@ public class Server {
                     ficha.setRotacion("-90");
                     resultado = "-90";
                     fichasEnMesa.add(ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 ladi iz: " + partesFicha[0]);
 
                 } else if (fichasEnMesa.get(posUltima).getNumeroIzquierda().equals(partesFicha[1])) {
@@ -196,6 +238,7 @@ public class Server {
                     ficha.setRotacion("90");
                     resultado = "90";
                     fichasEnMesa.add(ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar izquierda");
@@ -211,6 +254,7 @@ public class Server {
                     ficha.setRotacion("-90");
                     resultado = "-90";
                     fichasEnMesa.add(ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else if (fichasEnMesa.get(posUltima).getNumeroDerecha().equals(partesFicha[1])) {
                     System.out.println("holaa 4");
@@ -219,6 +263,7 @@ public class Server {
                     ficha.setRotacion("90");
                     resultado = "90";
                     fichasEnMesa.add(ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar derecha");
@@ -227,12 +272,12 @@ public class Server {
             }
 
         }
-        System.out.println("vector");
+        /*System.out.println("vector");
         for (Ficha ficha : fichasEnMesa) {
             System.out.println(ficha.getNumeroIzquierda() + "_ " + ficha.getNumeroDerecha());
             System.out.println(ficha.isIzquierda() + " " + ficha.isDerecha());
         }
-        System.out.println("fin");
+        System.out.println("fin");*/
         salida.writeUTF(resultado);
     }
 
@@ -249,6 +294,7 @@ public class Server {
             Ficha ficha = new Ficha(partesFicha[0], partesFicha[1]);
             ficha.setRotacion("-90");
             resultado = "-90";
+            siguienteTurno();
             fichasEnMesa.add(ficha);
 
             //esta condicion es aplicada solo cuando esta puesta la primera ficha en mesa
@@ -258,21 +304,35 @@ public class Server {
             if (fichasEnMesa.get(0).getNumeroIzquierda().equals(partesFicha[0])) {
 
                 Ficha ficha = new Ficha(partesFicha[0], partesFicha[1]);
-                fichasEnMesa.get(0).setDerecha(true);
+
+                if (fichasEnMesa.get(0).isCambioPos()) {
+                    fichasEnMesa.get(0).setDerecha(true);
+                } else {
+                    fichasEnMesa.get(0).setIzquierda(true);
+                }
+
                 ficha.setIzquierda(true);
                 ficha.setRotacion("90");
                 resultado = "90";
                 fichasEnMesa.add(0, ficha);
+                siguienteTurno();
                 System.out.println("parte correpa: " + partesFicha[0]);
 
                 //evalua la prrmera ficha en mesa por el lado izquierdo para saber si la ficha que envia el cliente concuerda el lado derecho
             } else if (fichasEnMesa.get(0).getNumeroIzquierda().equals(partesFicha[1])) {
-                fichasEnMesa.get(0).setDerecha(true);
+
                 Ficha ficha = new Ficha(partesFicha[0], partesFicha[1]);
+                if (fichasEnMesa.get(0).isCambioPos()) {
+                    fichasEnMesa.get(0).setDerecha(true);
+                } else {
+                    fichasEnMesa.get(0).setIzquierda(true);
+                }
+
                 ficha.setDerecha(true);
                 ficha.setRotacion("-90");
                 resultado = "-90";
                 fichasEnMesa.add(0, ficha);
+                siguienteTurno();
                 System.out.println("parte correpa: " + partesFicha[1]);
             } else {
                 System.out.println("ficha no se puede jugar");
@@ -293,6 +353,7 @@ public class Server {
                     ficha.setRotacion("90");
                     resultado = "90";
                     fichasEnMesa.add(0, ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 ladi iz: " + partesFicha[0]);
 
                 } else if (fichasEnMesa.get(0).getNumeroIzquierda().equals(partesFicha[1])) {
@@ -302,6 +363,7 @@ public class Server {
                     ficha.setRotacion("-90");
                     resultado = "-90";
                     fichasEnMesa.add(0, ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar izquierda");
@@ -317,6 +379,7 @@ public class Server {
                     ficha.setRotacion("90");
                     resultado = "90";
                     fichasEnMesa.add(0, ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else if (fichasEnMesa.get(0).getNumeroDerecha().equals(partesFicha[1])) {
                     System.out.println("holaa 4");
@@ -325,6 +388,7 @@ public class Server {
                     ficha.setRotacion("-90");
                     resultado = "-90";
                     fichasEnMesa.add(0, ficha);
+                    siguienteTurno();
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar derecha");
@@ -344,9 +408,9 @@ public class Server {
 
     private boolean permitirEntradaClientes(String nombre) {
         boolean resultado = false;
-        
+
         if (clientes.size() <= cantidadJugadores || clientes.contains(new Cliente(nombre))) {
-          
+
             resultado = true;
         }
 
@@ -463,6 +527,13 @@ public class Server {
         }
     }
 
-    //private int getTurno(){
-    //}
+    private void siguienteTurno() {
+
+        if (turno >= clientes.size() - 1) {
+            turno = 0;
+        } else {
+            turno++;
+        }
+    }
+
 }
