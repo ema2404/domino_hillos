@@ -1,15 +1,23 @@
 package edu.cecar.dominoes.Server;
 
 import edu.cecar.dominoes.RecursosCompartidos.Ficha;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Timer;
 
 public class Server {
 
@@ -23,19 +31,22 @@ public class Server {
     private DataInputStream entrada;
     private DataOutputStream salida;
     private Socket clienteConexion;
-    private ArrayList<Cliente> clientes = new ArrayList<>();
+
     private String[] fichas = {"0_0", "0_1", "0_2", "0_3", "0_4", "0_5", "0_6", "1_1", "1_2", "1_3", "1_4", "1_5", "1_6", "2_2",
         "2_3", "2_4", "2_5", "2_6", "3_3", "3_4", "3_5", "3_6", "4_4", "4_5", "4_6", "5_5", "5_6", "6_6"};
     ArrayList<String> fichasDisponibles;
     private boolean darFichas = false;
-
-    private int tiempoDeEspera = 5;
-    private int numMaxBloqueo = 2;
+    private ArrayList<Cliente> puntosTodosclientes = new ArrayList<>();
+    private ArrayList<Cliente> clientes = new ArrayList<>();
+    private int tiempoDeEspera = 15;
+    private int numMaxBloqueo = 7;
     private int tiempoRestanteEntreEspera = tiempoDeEspera;
     private boolean inicioEspera = false;
     private boolean inicioPartida = false;
+    private boolean partidaGuardad = false;
     private int turno = 0;
     private int[] numerosUtilzados = {0, 0, 0, 0, 0, 0, 0};
+   
 
     ArrayList<Ficha> fichasEnMesa = new ArrayList<Ficha>();
 
@@ -53,6 +64,15 @@ public class Server {
     }
 
     public void iniciar() {
+        cargarPuntos();
+        /*
+        clientes.add(new Cliente("a"));
+        clientes.add(new Cliente("b"));
+        clientes.add(new Cliente("c"));
+        clientes.add(new Cliente("d"));
+         */
+
+        
 
         while (true) {
 
@@ -76,38 +96,56 @@ public class Server {
                             break;
 
                         case "fichas":
-                            fichas(datos[0]);
+                            if (datos[0].length() > 0) {
+                                fichas(datos[0]);
+                            }
                             break;
                         case "listo":
+                            if(datos[0].length()>0)
                             listo(datos[0]);
                             break;
                         case "conectados":
+                            if(datos[0].length()>0)
                             conectados();
                             break;
                         case "tiempoDeEspera":
+                            if(datos[0].length()>0)
                             tiempoDeEspera();
                             break;
                         case "jugarIzquierda":
+                            if(datos[0].length()>0)
                             jugarIzquierda(datos[0], datos[2]);
 
                             break;
                         case "jugarDerecha":
+                            if(datos[0].length()>0)
                             jugarDerecha(datos[0], datos[2]);
 
                             break;
                         case "actualizacionTablero":
-                            actualizarMeza(datos[0], datos[2]);
+                            System.out.println("Actulizar juego: tam:"+datos[0].length()+" palabra: "+datos[0]);
+                            if (datos[0].length() > 0) {
+                                actualizarMeza(datos[0], datos[2]);
+                            }
                             break;
                         case "turno":
-                            esMiTurno(datos[0]);
+                            if (datos[0].length() > 0) {
+                                esMiTurno(datos[0]);
+                            }
                             break;
                         case "paso":
+                            if(datos[0].length()>0)
                             paso();
 
                             break;
                         case "ganador":
-                            ganador();
+                            if (datos[0].length() > 0) {
+                                ganador();
+                            }
 
+                            break;
+                        case "estadisticas":
+                            staticasPlanas();
                             break;
                     }
                 } else {
@@ -149,10 +187,12 @@ public class Server {
             resultado = "0;";
         }
 
-        int pos = clientes.indexOf(new Cliente(nombre));
+        if (!partidaGuardad) {
 
-        clientes.get(pos).setActivo(true);
+            int pos = clientes.indexOf(new Cliente(nombre));
 
+            clientes.get(pos).setActivo(true);
+        }
         salida.writeUTF(resultado);
 
     }
@@ -629,7 +669,7 @@ public class Server {
             System.out.println("entra ganador");
             Ficha primera = fichasEnMesa.get(0);
             Ficha ultima = fichasEnMesa.get(fichasEnMesa.size() - 1);
-/*
+            /*
             if (!primera.isDerecha()) {
                 System.out.println("1a " + primera.getNumeroDerecha());
 
@@ -660,7 +700,7 @@ public class Server {
             }
              */
             boolean quedanJugada = quedanJugada();
-            System.out.println("Quedan jugadas = "+ quedanJugada);
+            System.out.println("Quedan jugadas = " + quedanJugada);
             if (quedanJugada) {
 
                 int[] sumaCliente = new int[clientes.size()];
@@ -683,7 +723,13 @@ public class Server {
             }
 
         }
+        String[] datos = ganador.split(",");
+        if (datos[0].equals("1") && !partidaGuardad) {
 
+            guardarEstadisticasJuego(clientes.indexOf(new Cliente(datos[1])));
+            partidaGuardad = true;
+
+        }
         System.out.println("ganador= " + ganador);
         salida.writeUTF(ganador);
     }
@@ -751,11 +797,124 @@ public class Server {
         return cliete;
 
     }
-    
-    private void guardarEstadisticasJuego(){
-        
-        
-        
+
+    private void guardarEstadisticasJuego(int posGanador) {
+        //clientes.get(posGanador).get
+
+        for (int i = 0; i < clientes.size(); i++) {
+
+            if (i == posGanador) {
+                if (puntosTodosclientes.contains(new Cliente(clientes.get(i).getNombre()))) {
+                    int pos = puntosTodosclientes.indexOf(new Cliente(clientes.get(i).getNombre()));
+                    int ganadas = puntosTodosclientes.get(pos).getGanadas() + 1;
+                    puntosTodosclientes.get(pos).setGanadas(ganadas);
+
+                } else {
+
+                    Cliente cliente = new Cliente(clientes.get(i).getNombre());
+                    cliente.setGanadas(1);
+                    puntosTodosclientes.add(cliente);
+
+                }
+            } else {
+
+                if (puntosTodosclientes.contains(new Cliente(clientes.get(i).getNombre()))) {
+                    int pos = puntosTodosclientes.indexOf(new Cliente(clientes.get(i).getNombre()));
+                    int ganadas = puntosTodosclientes.get(pos).getPerdidas() + 1;
+                    puntosTodosclientes.get(pos).setPerdidas(ganadas);
+
+                } else {
+
+                    Cliente cliente = new Cliente(clientes.get(i).getNombre());
+                    cliente.setPerdidas(1);
+                    puntosTodosclientes.add(cliente);
+
+                }
+
+            }
+
+        }
+        updateFile(puntosTodosclientes);
+        timer.start();
     }
-    
+
+    private void updateFile(ArrayList<Cliente> a) {
+
+        ObjectOutputStream escribiendoFichero;
+        try {
+            if (new File("puntos.dat").exists()) {
+                new File("puntos.dat").delete();
+            }
+
+            escribiendoFichero = new ObjectOutputStream(new FileOutputStream("puntos.dat"));
+            escribiendoFichero.writeObject(a);
+            escribiendoFichero.close();
+
+        } catch (Exception ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private void cargarPuntos() {
+        ObjectInputStream leyendoFichero = null;
+
+        try {
+
+            File file = new File("puntos.dat");
+            if (file.exists()) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                leyendoFichero = new ObjectInputStream(fileInputStream);
+                puntosTodosclientes = (ArrayList<Cliente>) leyendoFichero.readObject();
+                leyendoFichero.close();
+                System.out.println("puntos cargados...");
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void staticasPlanas() throws IOException {
+        String resultado ="";
+        
+        for (Cliente cl : puntosTodosclientes) {
+             resultado +="jugador: " + cl.getNombre() + " ganadas: " + cl.getGanadas() + " perdidas: " + cl.getPerdidas()+"\n";
+        }
+        
+        /*puntosTodosclientes.forEach((Cliente cl) -> {
+            System.out.println("cliente: " + cl.getNombre() + " ganadas: " + cl.getGanadas() + " perdidas: " + cl.getPerdidas());
+           
+        });*/
+        salida.writeUTF(resultado);
+    }
+
+    Timer timer = new Timer(5000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            fichasDisponibles.clear();
+            darFichas = false;
+            puntosTodosclientes.clear();
+            clientes.clear();
+            tiempoRestanteEntreEspera = tiempoDeEspera;
+            inicioEspera = false;
+            inicioPartida = false;
+            turno = 0;
+
+            for (int i = 0; i < numerosUtilzados.length; i++) {
+                numerosUtilzados[i] = 0;
+            }
+
+            fichasEnMesa.clear();
+            partidaGuardad = false;
+            cargarPuntos();
+            for (String ficha : fichas) {
+                fichasDisponibles.add(ficha);
+            }
+            timer.stop();
+
+        }
+    });
+
 }
