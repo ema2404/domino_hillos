@@ -169,13 +169,14 @@ public class Server {
             System.out.println("entro");
 
             Ficha ficha = new Ficha(partesFicha[1], partesFicha[0]);
-            eliminarFichaJugador(ficha, new Cliente(nombre));
+
             ficha.setCambioPos(true);
             ficha.setRotacion("90");
             resultado = "90";
             siguienteTurno();
             fichasEnMesa.add(ficha);
             sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+            eliminarFichaJugador(ficha, new Cliente(nombre));
 
             //esta condicion es aplicada solo cuando esta puesta la primera ficha en mesa
         } else if (fichasEnMesa.size() == 1) {
@@ -594,8 +595,13 @@ public class Server {
         int num1 = Integer.valueOf(dato1);
         int num2 = Integer.valueOf(dato2);
 
-        numerosUtilzados[num1]++;
-        numerosUtilzados[num2]++;
+        if (dato1.equals(dato2)) {
+            numerosUtilzados[num1]++;
+
+        } else {
+            numerosUtilzados[num1]++;
+            numerosUtilzados[num2]++;
+        }
 
     }
 
@@ -611,39 +617,51 @@ public class Server {
         boolean izquierdo = false;
 
         for (Cliente cliente : clientes) {
+            System.out.println("----fichas rstantes-----");
+            System.out.println(cliente.getFichas().size() + "");
+            System.out.println("-----------");
 
-            if (cliente.getFichas().size() == 0) {
+            if (cliente.getFichas().size() <= 0) {
                 ganador = "1," + cliente.getNombre();
             }
         }
-        if (ganador.equals("") && fichasEnMesa.size()>0) {
+        if (ganador.equals("") && fichasEnMesa.size() > 0) {
             System.out.println("entra ganador");
             Ficha primera = fichasEnMesa.get(0);
             Ficha ultima = fichasEnMesa.get(fichasEnMesa.size() - 1);
-
+/*
             if (!primera.isDerecha()) {
+                System.out.println("1a " + primera.getNumeroDerecha());
 
                 if (numerosUtilzados[Integer.valueOf(primera.getNumeroDerecha())] >= numMaxBloqueo) {
+                    System.out.println("1");
                     derecho = true;
                 }
             } else if (!primera.isIzquierda()) {
+                System.out.println("1b " + primera.getNumeroIzquierda());
                 if (numerosUtilzados[Integer.valueOf(primera.getNumeroIzquierda())] >= numMaxBloqueo) {
+                    System.out.println("2");
                     derecho = true;
                 }
             }
 
             if (!ultima.isDerecha()) {
+                System.out.println("2a " + ultima.getNumeroDerecha());
                 if (numerosUtilzados[Integer.valueOf(ultima.getNumeroDerecha())] >= numMaxBloqueo) {
+                    System.out.println("3");
                     izquierdo = true;
                 }
             } else if (!ultima.isIzquierda()) {
+                System.out.println("2b " + ultima.getNumeroIzquierda());
                 if (numerosUtilzados[Integer.valueOf(ultima.getNumeroIzquierda())] >= numMaxBloqueo) {
+                    System.out.println("4");
                     izquierdo = true;
                 }
             }
-            System.out.println(izquierdo + " " + derecho);
-
-            if (!izquierdo && !derecho) {
+             */
+            boolean quedanJugada = quedanJugada();
+            System.out.println("Quedan jugadas = "+ quedanJugada);
+            if (quedanJugada) {
 
                 int[] sumaCliente = new int[clientes.size()];
                 for (int i = 0; i < sumaCliente.length; i++) {
@@ -662,19 +680,66 @@ public class Server {
 
                 ganador = "1," + clientes.get(getMin(sumaCliente)).getNombre();
 
-                //for (int i = 0; i < sumaCliente.length; i++) {
-                //    System.out.println(sumaCliente[i]);
-                //}
             }
-        }else{
-            ganador="0, ";
+
         }
 
         System.out.println("ganador= " + ganador);
         salida.writeUTF(ganador);
     }
 
-    public static int getMin(int[] inputArray) {
+    private boolean quedanJugada() {
+        boolean resultado = true;
+        Ficha primera = fichasEnMesa.get(0);
+        Ficha ultima = fichasEnMesa.get(fichasEnMesa.size() - 1);
+
+        for (Cliente cliente : clientes) {
+            for (Ficha ficha : cliente.getFichas()) {
+
+                if (!primera.isDerecha()) {
+                    System.out.println("1a " + primera.getNumeroDerecha());
+
+                    if (primera.getNumeroDerecha().equals(ficha.getNumeroDerecha())) {
+                        resultado = false;
+                    }
+                    if (primera.getNumeroDerecha().equals(ficha.getNumeroIzquierda())) {
+                        resultado = false;
+                    }
+                } else if (!primera.isIzquierda()) {
+                    System.out.println("1b " + primera.getNumeroIzquierda());
+                    if (primera.getNumeroIzquierda().equals(ficha.getNumeroDerecha())) {
+                        resultado = false;
+                    }
+                    if (primera.getNumeroIzquierda().equals(ficha.getNumeroIzquierda())) {
+                        resultado = false;
+                    }
+                }
+
+                if (!ultima.isDerecha()) {
+                    System.out.println("2a " + ultima.getNumeroDerecha());
+                    if (ultima.getNumeroDerecha().equals(ficha.getNumeroDerecha())) {
+                        resultado = false;
+                    }
+                    if (ultima.getNumeroDerecha().equals(ficha.getNumeroIzquierda())) {
+                        resultado = false;
+                    }
+                } else if (!ultima.isIzquierda()) {
+                    System.out.println("2b " + ultima.getNumeroIzquierda());
+                    if (ultima.getNumeroIzquierda().equals(ficha.getNumeroDerecha())) {
+                        resultado = false;
+                    }
+                    if (ultima.getNumeroIzquierda().equals(ficha.getNumeroIzquierda())) {
+                        resultado = false;
+                    }
+                }
+
+            }
+        }
+
+        return resultado;
+    }
+
+    public int getMin(int[] inputArray) {
         int minValue = inputArray[0];
         int cliete = 0;
         for (int i = 1; i < inputArray.length; i++) {
@@ -686,4 +751,11 @@ public class Server {
         return cliete;
 
     }
+    
+    private void guardarEstadisticasJuego(){
+        
+        
+        
+    }
+    
 }
