@@ -1,6 +1,5 @@
 package edu.cecar.dominoes.Server;
 
-import com.sun.security.ntlm.Client;
 import edu.cecar.dominoes.RecursosCompartidos.Ficha;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,10 +30,12 @@ public class Server {
     private boolean darFichas = false;
 
     private int tiempoDeEspera = 5;
+    private int numMaxBloqueo = 2;
     private int tiempoRestanteEntreEspera = tiempoDeEspera;
     private boolean inicioEspera = false;
     private boolean inicioPartida = false;
     private int turno = 0;
+    private int[] numerosUtilzados = {0, 0, 0, 0, 0, 0, 0};
 
     ArrayList<Ficha> fichasEnMesa = new ArrayList<Ficha>();
 
@@ -87,11 +88,11 @@ public class Server {
                             tiempoDeEspera();
                             break;
                         case "jugarIzquierda":
-                            jugarIzquierda(datos[2]);
+                            jugarIzquierda(datos[0], datos[2]);
 
                             break;
                         case "jugarDerecha":
-                            jugarDerecha(datos[2]);
+                            jugarDerecha(datos[0], datos[2]);
 
                             break;
                         case "actualizacionTablero":
@@ -102,6 +103,10 @@ public class Server {
                             break;
                         case "paso":
                             paso();
+                            ganador();
+                            break;
+                        case "resultadoFinal":
+
                             break;
                     }
                 } else {
@@ -125,8 +130,8 @@ public class Server {
         }
 
     }
-    
-    private void paso(){
+
+    private void paso() {
         siguienteTurno();
     }
 
@@ -147,13 +152,11 @@ public class Server {
 
         clientes.get(pos).setActivo(true);
 
-        //System.out.println(fichasEnMesa.size());
-        //System.out.println(resultado);
         salida.writeUTF(resultado);
 
     }
 
-    private void jugarDerecha(String fichaCliente) throws IOException {
+    private void jugarDerecha(String nombre, String fichaCliente) throws IOException {
 
         String resultado = "0";
         System.out.println(fichaCliente);
@@ -165,11 +168,13 @@ public class Server {
             System.out.println("entro");
 
             Ficha ficha = new Ficha(partesFicha[1], partesFicha[0]);
+            eliminarFichaJugador(ficha, new Cliente(nombre));
             ficha.setCambioPos(true);
             ficha.setRotacion("90");
             resultado = "90";
             siguienteTurno();
             fichasEnMesa.add(ficha);
+            sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
 
             //esta condicion es aplicada solo cuando esta puesta la primera ficha en mesa
         } else if (fichasEnMesa.size() == 1) {
@@ -190,6 +195,8 @@ public class Server {
                 resultado = "-90";
                 fichasEnMesa.add(ficha);
                 siguienteTurno();
+                sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                eliminarFichaJugador(ficha, new Cliente(nombre));
                 System.out.println("parte correpa: " + partesFicha[0]);
 
                 //evalua la prrmera ficha en mesa por el lado izquierdo para saber si la ficha que envia el cliente concuerda el lado derecho
@@ -208,6 +215,8 @@ public class Server {
                 resultado = "90";
                 fichasEnMesa.add(ficha);
                 siguienteTurno();
+                sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                eliminarFichaJugador(ficha, new Cliente(nombre));
                 System.out.println("parte correpa: " + partesFicha[1]);
             } else {
                 System.out.println("ficha no se puede jugar");
@@ -229,6 +238,8 @@ public class Server {
                     resultado = "-90";
                     fichasEnMesa.add(ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 ladi iz: " + partesFicha[0]);
 
                 } else if (fichasEnMesa.get(posUltima).getNumeroIzquierda().equals(partesFicha[1])) {
@@ -239,6 +250,8 @@ public class Server {
                     resultado = "90";
                     fichasEnMesa.add(ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar izquierda");
@@ -255,6 +268,8 @@ public class Server {
                     resultado = "-90";
                     fichasEnMesa.add(ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else if (fichasEnMesa.get(posUltima).getNumeroDerecha().equals(partesFicha[1])) {
                     System.out.println("holaa 4");
@@ -264,6 +279,8 @@ public class Server {
                     resultado = "90";
                     fichasEnMesa.add(ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar derecha");
@@ -272,16 +289,21 @@ public class Server {
             }
 
         }
-        /*System.out.println("vector");
+        System.out.println("vector");
         for (Ficha ficha : fichasEnMesa) {
             System.out.println(ficha.getNumeroIzquierda() + "_ " + ficha.getNumeroDerecha());
             System.out.println(ficha.isIzquierda() + " " + ficha.isDerecha());
         }
-        System.out.println("fin");*/
+        System.out.println("fin");
+        for (int numerosUtilzado : numerosUtilzados) {
+            System.out.println(numerosUtilzado);
+
+        }
+        System.out.println("fin numero utilizados");
         salida.writeUTF(resultado);
     }
 
-    private void jugarIzquierda(String fichaCliente) throws IOException {
+    private void jugarIzquierda(String nombre, String fichaCliente) throws IOException {
 
         String resultado = "0";
         System.out.println(fichaCliente);
@@ -296,6 +318,8 @@ public class Server {
             resultado = "-90";
             siguienteTurno();
             fichasEnMesa.add(ficha);
+            sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+            eliminarFichaJugador(ficha, new Cliente(nombre));
 
             //esta condicion es aplicada solo cuando esta puesta la primera ficha en mesa
         } else if (fichasEnMesa.size() == 1) {
@@ -316,6 +340,8 @@ public class Server {
                 resultado = "90";
                 fichasEnMesa.add(0, ficha);
                 siguienteTurno();
+                sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                eliminarFichaJugador(ficha, new Cliente(nombre));
                 System.out.println("parte correpa: " + partesFicha[0]);
 
                 //evalua la prrmera ficha en mesa por el lado izquierdo para saber si la ficha que envia el cliente concuerda el lado derecho
@@ -333,6 +359,8 @@ public class Server {
                 resultado = "-90";
                 fichasEnMesa.add(0, ficha);
                 siguienteTurno();
+                sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                eliminarFichaJugador(ficha, new Cliente(nombre));
                 System.out.println("parte correpa: " + partesFicha[1]);
             } else {
                 System.out.println("ficha no se puede jugar");
@@ -354,6 +382,8 @@ public class Server {
                     resultado = "90";
                     fichasEnMesa.add(0, ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 ladi iz: " + partesFicha[0]);
 
                 } else if (fichasEnMesa.get(0).getNumeroIzquierda().equals(partesFicha[1])) {
@@ -364,6 +394,8 @@ public class Server {
                     resultado = "-90";
                     fichasEnMesa.add(0, ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar izquierda");
@@ -380,6 +412,8 @@ public class Server {
                     resultado = "90";
                     fichasEnMesa.add(0, ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else if (fichasEnMesa.get(0).getNumeroDerecha().equals(partesFicha[1])) {
                     System.out.println("holaa 4");
@@ -389,6 +423,8 @@ public class Server {
                     resultado = "-90";
                     fichasEnMesa.add(0, ficha);
                     siguienteTurno();
+                    sumarFichaEnMeza(partesFicha[0], partesFicha[1]);
+                    eliminarFichaJugador(ficha, new Cliente(nombre));
                     System.out.println("parte correcta cuando hay mas de 1 lado de: " + partesFicha[1]);
                 } else {
                     System.out.println("ficha no se puede jugar derecha");
@@ -403,6 +439,21 @@ public class Server {
             System.out.println(ficha.isIzquierda() + " " + ficha.isDerecha());
         }
         System.out.println("fin");
+        for (int numerosUtilzado : numerosUtilzados) {
+            System.out.println(numerosUtilzado);
+
+        }
+        System.out.println("fin numero utilizados");
+
+        for (Cliente cliente : clientes) {
+            System.out.println("---------------");
+            for (Ficha ficha : cliente.getFichas()) {
+                System.out.println(ficha.fichaCompleta());
+
+            }
+            System.out.println("---------------");
+        }
+
         salida.writeUTF(resultado);
     }
 
@@ -440,9 +491,10 @@ public class Server {
         String fichas = "";
         Random r = new Random();
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < numMaxBloqueo; i++) {
             int numero = r.nextInt(fichasDisponibles.size());
-            clientes.get(posCliente).addFicha(fichasDisponibles.get(numero));
+            String[] aux = fichasDisponibles.get(numero).split("_");
+            clientes.get(posCliente).addFicha(new Ficha(aux[0], aux[1]));
             fichas += fichasDisponibles.get(numero) + ",";
             System.out.println(nombre + " - " + fichasDisponibles.get(numero));
             fichasDisponibles.remove(numero);
@@ -534,6 +586,102 @@ public class Server {
         } else {
             turno++;
         }
+        System.out.println("");
     }
 
+    private void sumarFichaEnMeza(String dato1, String dato2) {
+        int num1 = Integer.valueOf(dato1);
+        int num2 = Integer.valueOf(dato2);
+
+        numerosUtilzados[num1]++;
+        numerosUtilzados[num2]++;
+
+    }
+
+    private void eliminarFichaJugador(Ficha ficha, Cliente cliente) {
+        int pos = clientes.indexOf(cliente);
+
+        clientes.get(pos).fichas.remove(ficha);
+    }
+
+    private String ganador() {
+        String ganador = "";
+        boolean derecho = false;
+        boolean izquierdo = false;
+        for (Cliente cliente : clientes) {
+
+            if (cliente.getFichas().size() == 0) {
+                ganador = cliente.getNombre();
+            }
+        }
+        if (ganador.length() <= 0) {
+            System.out.println("entra ganador");
+            Ficha primera = fichasEnMesa.get(0);
+            Ficha ultima = fichasEnMesa.get(fichasEnMesa.size() - 1);
+
+            if (!primera.isDerecha()) {
+
+                if (numerosUtilzados[Integer.valueOf(primera.getNumeroDerecha())] >= numMaxBloqueo) {
+                    derecho = true;
+                }
+            } else if (!primera.isIzquierda()) {
+                if (numerosUtilzados[Integer.valueOf(primera.getNumeroIzquierda())] >= numMaxBloqueo) {
+                    derecho = true;
+                }
+            }
+
+            if (!ultima.isDerecha()) {
+                if (numerosUtilzados[Integer.valueOf(ultima.getNumeroDerecha())] >= numMaxBloqueo) {
+                    izquierdo = true;
+                }
+            } else if (!ultima.isIzquierda()) {
+                if (numerosUtilzados[Integer.valueOf(ultima.getNumeroIzquierda())] >= numMaxBloqueo) {
+                    izquierdo = true;
+                }
+            }
+            System.out.println(izquierdo + " " + derecho);
+
+            if (izquierdo && derecho) {
+
+                int[] sumaCliente = new int[clientes.size()];
+                for (int i = 0; i < sumaCliente.length; i++) {
+                    sumaCliente[i] = 0;
+                }
+
+                for (int i = 0; i < clientes.size(); i++) {
+
+                    for (Ficha ficha : clientes.get(i).getFichas()) {
+                        System.out.println(ficha.fichaCompleta());
+                        sumaCliente[i] += Integer.valueOf(ficha.getNumeroDerecha()) + Integer.valueOf(ficha.getNumeroIzquierda());
+
+                    }
+
+                }
+                
+                ganador=""+getMin(sumaCliente);
+
+                //for (int i = 0; i < sumaCliente.length; i++) {
+                //    System.out.println(sumaCliente[i]);
+                //}
+
+            }
+
+        }
+
+        System.out.println("ganador= "+ganador);
+        return ganador;
+    }
+
+    public static int getMin(int[] inputArray) {
+        int minValue = inputArray[0];
+        int cliete=0;
+        for (int i = 1; i < inputArray.length; i++) {
+            if (inputArray[i] < minValue) {
+                minValue = inputArray[i];
+                cliete=i;
+            }
+        }
+        return cliete;
+
+    }
 }
