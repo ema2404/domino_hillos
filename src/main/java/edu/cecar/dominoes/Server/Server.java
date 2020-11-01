@@ -103,9 +103,10 @@ public class Server {
                             break;
                         case "paso":
                             paso();
-                            ganador();
+
                             break;
-                        case "resultadoFinal":
+                        case "ganador":
+                            ganador();
 
                             break;
                     }
@@ -604,17 +605,18 @@ public class Server {
         clientes.get(pos).fichas.remove(ficha);
     }
 
-    private String ganador() {
+    private void ganador() throws IOException {
         String ganador = "";
         boolean derecho = false;
         boolean izquierdo = false;
+
         for (Cliente cliente : clientes) {
 
             if (cliente.getFichas().size() == 0) {
-                ganador = cliente.getNombre();
+                ganador = "1," + cliente.getNombre();
             }
         }
-        if (ganador.length() <= 0) {
+        if (ganador.equals("") && fichasEnMesa.size()>0) {
             System.out.println("entra ganador");
             Ficha primera = fichasEnMesa.get(0);
             Ficha ultima = fichasEnMesa.get(fichasEnMesa.size() - 1);
@@ -641,7 +643,7 @@ public class Server {
             }
             System.out.println(izquierdo + " " + derecho);
 
-            if (izquierdo && derecho) {
+            if (!izquierdo && !derecho) {
 
                 int[] sumaCliente = new int[clientes.size()];
                 for (int i = 0; i < sumaCliente.length; i++) {
@@ -657,28 +659,28 @@ public class Server {
                     }
 
                 }
-                
-                ganador=""+getMin(sumaCliente);
+
+                ganador = "1," + clientes.get(getMin(sumaCliente)).getNombre();
 
                 //for (int i = 0; i < sumaCliente.length; i++) {
                 //    System.out.println(sumaCliente[i]);
                 //}
-
             }
-
+        }else{
+            ganador="0, ";
         }
 
-        System.out.println("ganador= "+ganador);
-        return ganador;
+        System.out.println("ganador= " + ganador);
+        salida.writeUTF(ganador);
     }
 
     public static int getMin(int[] inputArray) {
         int minValue = inputArray[0];
-        int cliete=0;
+        int cliete = 0;
         for (int i = 1; i < inputArray.length; i++) {
             if (inputArray[i] < minValue) {
                 minValue = inputArray[i];
-                cliete=i;
+                cliete = i;
             }
         }
         return cliete;
