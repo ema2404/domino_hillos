@@ -10,17 +10,36 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.Timer;
 
 public class Juego extends javax.swing.JFrame {
 
     LogicaCliente logicaCliente = new LogicaCliente();
+    NotificarTurno notificarTurno;
+    Ganador ganador;
+
+    Juego a = this;
+
     Timer timerActualizar = new Timer(2000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            logicaCliente.actualizacionJugada(jpJuego);
+            logicaCliente.ganador(a, ganador);
+            if (!logicaCliente.isJuegoGanado()) {
+                
+                logicaCliente.actualizacionJugada(jpJuego);
+                logicaCliente.esMiTurno(notificarTurno, btnDerecha, btnPaso, btnIzquierda);
+            }else{
+                timerActualizar.stop();
+                logicaCliente.setJuegoGanado(false);
+            }
+
+        }
+    });
+    Timer timerPreguntarTurno = new Timer(2000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
         }
     });
 
@@ -67,8 +86,8 @@ public class Juego extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         btnIzquierda = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnDerecha = new javax.swing.JButton();
+        btnPaso = new javax.swing.JButton();
         jpFichaParaJugar = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -106,20 +125,28 @@ public class Juego extends javax.swing.JFrame {
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
 
         btnIzquierda.setText("Izquierda");
+        btnIzquierda.setEnabled(false);
         btnIzquierda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnIzquierdaActionPerformed(evt);
             }
         });
 
-        jButton2.setText("derecha");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnDerecha.setText("derecha");
+        btnDerecha.setEnabled(false);
+        btnDerecha.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnDerechaActionPerformed(evt);
             }
         });
 
-        jButton3.setText("Paso");
+        btnPaso.setText("Paso");
+        btnPaso.setEnabled(false);
+        btnPaso.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPasoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -129,9 +156,9 @@ public class Juego extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(btnIzquierda)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton3)
+                .addComponent(btnPaso)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(btnDerecha)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -139,9 +166,9 @@ public class Juego extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
+                    .addComponent(btnDerecha)
                     .addComponent(btnIzquierda)
-                    .addComponent(jButton3))
+                    .addComponent(btnPaso))
                 .addContainerGap())
         );
 
@@ -195,6 +222,7 @@ public class Juego extends javax.swing.JFrame {
     private void ventanaAvierta(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_ventanaAvierta
 
         timerActualizar.setRepeats(true);
+        timerPreguntarTurno.setRepeats(true);
 
         PedirNombre nombre = new PedirNombre(this, rootPaneCheckingEnabled, logicaCliente);
         nombre.setLocationRelativeTo(this);
@@ -212,6 +240,9 @@ public class Juego extends javax.swing.JFrame {
         if (espera.getTiempo() == 0) {
             logicaCliente.pedirFichas(jpFichasDisponibles, jpFichaParaJugar);
             timerActualizar.start();
+            timerPreguntarTurno.start();
+            notificarTurno = new NotificarTurno(this, true, logicaCliente.getNombre());
+
         } else {
             JOptionPane.showMessageDialog(rootPane, " Vuelva a entrar");
             Juego juego = new Juego();
@@ -230,7 +261,7 @@ public class Juego extends javax.swing.JFrame {
 
         if (jpFichaParaJugar.getComponents().length > 0) {
             JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
-            logicaCliente.mandarFichaIzquierda(label.getName(), jpJuego);
+            logicaCliente.mandarFichaIzquierda(label.getName(), jpJuego, btnDerecha, btnPaso, btnIzquierda);
             jpFichaParaJugar.removeAll();
         }
         //logicaCliente.mandarFichaIzquierda("0_0",jpJuego);        
@@ -240,23 +271,28 @@ public class Juego extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnIzquierdaActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnDerechaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDerechaActionPerformed
         // TODO add your handling code here:
         if (jpFichaParaJugar.getComponents().length > 0) {
             JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
-            logicaCliente.mandarFichaDerecha(label.getName(), jpJuego);
+            logicaCliente.mandarFichaDerecha(label.getName(), jpJuego, btnDerecha, btnPaso, btnIzquierda);
             jpFichaParaJugar.removeAll();
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnDerechaActionPerformed
+
+    private void btnPasoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPasoActionPerformed
+        // TODO add your handling code here:
+        logicaCliente.paso(btnIzquierda, btnPaso, btnDerecha);
+    }//GEN-LAST:event_btnPasoActionPerformed
 
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnDerecha;
     private javax.swing.JButton btnIzquierda;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton btnPaso;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane;
