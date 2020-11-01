@@ -89,6 +89,9 @@ public class Juego extends javax.swing.JFrame {
         btnDerecha = new javax.swing.JButton();
         btnPaso = new javax.swing.JButton();
         jpFichaParaJugar = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtEstadisticas = new javax.swing.JTextArea();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(97, 87, 87));
@@ -114,11 +117,11 @@ public class Juego extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 176, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 123, Short.MAX_VALUE)
         );
 
         jPanel2.setBackground(new java.awt.Color(0, 0, 0));
@@ -175,6 +178,14 @@ public class Juego extends javax.swing.JFrame {
         jpFichaParaJugar.setBackground(new java.awt.Color(0, 0, 0));
         jpFichaParaJugar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 255, 102)));
 
+        txtEstadisticas.setEditable(false);
+        txtEstadisticas.setColumns(20);
+        txtEstadisticas.setRows(5);
+        jScrollPane1.setViewportView(txtEstadisticas);
+
+        jLabel1.setText("Historial de puntos");
+        jLabel1.setToolTipText("");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -182,9 +193,7 @@ public class Juego extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane)
-                        .addContainerGap())
+                    .addComponent(jScrollPane)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jpFichasDisponibles, javax.swing.GroupLayout.PREFERRED_SIZE, 701, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -192,10 +201,18 @@ public class Juego extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(73, 73, 73)
-                                .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(59, 59, 59)
+                                .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(32, 32, 32)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(128, 128, 128)
+                                        .addComponent(jLabel1)))))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -203,17 +220,22 @@ public class Juego extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jpFichasDisponibles, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jpFichasDisponibles, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 17, Short.MAX_VALUE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -221,9 +243,12 @@ public class Juego extends javax.swing.JFrame {
 
     private void ventanaAvierta(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_ventanaAvierta
 
+        
         timerActualizar.setRepeats(true);
         timerPreguntarTurno.setRepeats(true);
-
+        logicaCliente.estadisticas(txtEstadisticas);
+        
+        
         PedirNombre nombre = new PedirNombre(this, rootPaneCheckingEnabled, logicaCliente);
         nombre.setLocationRelativeTo(this);
         nombre.setVisible(true);
@@ -293,11 +318,14 @@ public class Juego extends javax.swing.JFrame {
     private javax.swing.JButton btnDerecha;
     private javax.swing.JButton btnIzquierda;
     private javax.swing.JButton btnPaso;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel jpFichaParaJugar;
     private javax.swing.JPanel jpFichasDisponibles;
     private javax.swing.JPanel jpJuego;
+    private javax.swing.JTextArea txtEstadisticas;
     // End of variables declaration//GEN-END:variables
 }
