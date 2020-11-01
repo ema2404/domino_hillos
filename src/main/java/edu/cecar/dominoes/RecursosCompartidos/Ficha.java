@@ -1,13 +1,52 @@
-
-
 package edu.cecar.dominoes.RecursosCompartidos;
-
 
 public class Ficha {
 
     String numeroIzquierda;
     String numeroDerecha;
+    boolean izquierda = false;
+    boolean derecha = false;
+    boolean cambioPos = false;
+
     String rotacion;
+
+    public boolean isIzquierda() {
+        return izquierda;
+    }
+
+    public boolean isDerecha() {
+        return derecha;
+    }
+
+    public void setIzquierda(boolean izquierda) {
+        if (cambioPos) {
+            this.derecha = izquierda;
+        } else {
+            this.izquierda = izquierda;
+        }
+    }
+
+    public void setDerecha(boolean derecha) {
+        if (cambioPos) {
+            this.izquierda = derecha;
+        } else {
+            this.derecha = derecha;
+        }
+    }
+
+    public void setCambioPos(boolean cambioPos) {
+        this.cambioPos = cambioPos;
+    }
+
+    public String fichaCompleta() {
+        String resultado = numeroIzquierda + "_" + numeroDerecha;
+
+        if (cambioPos) {
+            resultado = numeroDerecha + "_" + numeroIzquierda;
+        }
+
+        return resultado;
+    }
 
     public String getRotacion() {
         return rotacion;
@@ -16,7 +55,6 @@ public class Ficha {
     public void setRotacion(String rotacion) {
         this.rotacion = rotacion;
     }
-    
 
     public Ficha(String numeroIzquierda, String numeroDerecha) {
         this.numeroIzquierda = numeroIzquierda;
@@ -24,7 +62,11 @@ public class Ficha {
     }
 
     public String getNumeroDerecha() {
+        //if(cambioPos){
+        //return numeroIzquierda;
+        //}
         return numeroDerecha;
+
     }
 
     public void setNumeroDerecha(String numeroDerecha) {
@@ -32,6 +74,10 @@ public class Ficha {
     }
 
     public String getNumeroIzquierda() {
+        //if(cambioPos){
+        //return numeroDerecha;
+        //}
+
         return numeroIzquierda;
     }
 
@@ -41,13 +87,9 @@ public class Ficha {
 
     @Override
     public boolean equals(Object obj) {
-        
-        
-        Ficha ficha =(Ficha)obj;
-        return (numeroIzquierda+"_"+numeroDerecha).equals(ficha.getNumeroIzquierda()+"_"+ficha.getNumeroDerecha()); //To change body of generated methods, choose Tools | Templates.
+
+        Ficha ficha = (Ficha) obj;
+        return (numeroIzquierda + "_" + numeroDerecha).equals(ficha.getNumeroIzquierda() + "_" + ficha.getNumeroDerecha()); //To change body of generated methods, choose Tools | Templates.
     }
 
-
-
-    
 }

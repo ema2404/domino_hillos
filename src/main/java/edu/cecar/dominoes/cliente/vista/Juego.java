@@ -6,18 +6,31 @@
 package edu.cecar.dominoes.cliente.vista;
 
 import edu.cecar.dominoes.cliente.logica.LogicaCliente;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JViewport;
+import javax.swing.Timer;
 
 public class Juego extends javax.swing.JFrame {
 
     LogicaCliente logicaCliente = new LogicaCliente();
+    Timer timerActualizar = new Timer(2000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            logicaCliente.actualizacionJugada(jpJuego);
+        }
+    });
 
     /**
      * Creates new form Main
      */
     public Juego() {
+
         initComponents();
-        //jpFichasDisponibles.setLayout(new BorderLayout());
+        jScrollPane.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
 
         this.revalidate();
         this.repaint();
@@ -30,6 +43,7 @@ public class Juego extends javax.swing.JFrame {
             public void run() {
 
                 Juego main = new Juego();
+
                 main.setLocationRelativeTo(null);
                 main.setVisible(true);
 
@@ -47,12 +61,14 @@ public class Juego extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane = new javax.swing.JScrollPane();
         jpJuego = new javax.swing.JPanel();
         jpFichasDisponibles = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnIzquierda = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
         jpFichaParaJugar = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -64,10 +80,9 @@ public class Juego extends javax.swing.JFrame {
             }
         });
 
-        jpJuego.setBackground(new java.awt.Color(10, 162, 10));
-        jpJuego.setAutoscrolls(true);
-        jpJuego.setPreferredSize(new java.awt.Dimension(1, 5));
+        jpJuego.setBackground(new java.awt.Color(14, 188, 3));
         jpJuego.setLayout(new java.awt.GridBagLayout());
+        jScrollPane.setViewportView(jpJuego);
 
         jpFichasDisponibles.setBackground(new java.awt.Color(0, 0, 0));
         jpFichasDisponibles.setBorder(javax.swing.BorderFactory.createCompoundBorder(new javax.swing.border.MatteBorder(null), new javax.swing.border.LineBorder(new java.awt.Color(0, 255, 255), 2, true)));
@@ -90,9 +105,21 @@ public class Juego extends javax.swing.JFrame {
         jPanel2.setBackground(new java.awt.Color(0, 0, 0));
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
 
-        jButton1.setText("Izquierda");
+        btnIzquierda.setText("Izquierda");
+        btnIzquierda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIzquierdaActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("derecha");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("Paso");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -100,10 +127,12 @@ public class Juego extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
+                .addComponent(btnIzquierda)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -111,7 +140,8 @@ public class Juego extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
-                    .addComponent(jButton1))
+                    .addComponent(btnIzquierda)
+                    .addComponent(jButton3))
                 .addContainerGap())
         );
 
@@ -122,24 +152,30 @@ public class Juego extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jpJuego, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jpFichasDisponibles, javax.swing.GroupLayout.PREFERRED_SIZE, 701, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jpFichasDisponibles, javax.swing.GroupLayout.PREFERRED_SIZE, 701, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(73, 73, 73)
+                                .addComponent(jpFichaParaJugar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jpJuego, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addContainerGap()
+                .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
@@ -158,6 +194,8 @@ public class Juego extends javax.swing.JFrame {
 
     private void ventanaAvierta(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_ventanaAvierta
 
+        timerActualizar.setRepeats(true);
+
         PedirNombre nombre = new PedirNombre(this, rootPaneCheckingEnabled, logicaCliente);
         nombre.setLocationRelativeTo(this);
         nombre.setVisible(true);
@@ -173,6 +211,7 @@ public class Juego extends javax.swing.JFrame {
 
         if (espera.getTiempo() == 0) {
             logicaCliente.pedirFichas(jpFichasDisponibles, jpFichaParaJugar);
+            timerActualizar.start();
         } else {
             JOptionPane.showMessageDialog(rootPane, " Vuelva a entrar");
             Juego juego = new Juego();
@@ -186,15 +225,41 @@ public class Juego extends javax.swing.JFrame {
 
     }//GEN-LAST:event_ventanaAvierta
 
+    private void btnIzquierdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIzquierdaActionPerformed
+        // TODO add your handling code here:
+
+        if (jpFichaParaJugar.getComponents().length > 0) {
+            JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
+            logicaCliente.mandarFichaIzquierda(label.getName(), jpJuego);
+            jpFichaParaJugar.removeAll();
+        }
+        //logicaCliente.mandarFichaIzquierda("0_0",jpJuego);        
+        //logicaCliente.mandarFichaIzquierda("2_3");
+        //logicaCliente.mandarFichaIzquierda("2_4");  
+
+
+    }//GEN-LAST:event_btnIzquierdaActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        if (jpFichaParaJugar.getComponents().length > 0) {
+            JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
+            logicaCliente.mandarFichaDerecha(label.getName(), jpJuego);
+            jpFichaParaJugar.removeAll();
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnIzquierda;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane;
     private javax.swing.JPanel jpFichaParaJugar;
     private javax.swing.JPanel jpFichasDisponibles;
     private javax.swing.JPanel jpJuego;

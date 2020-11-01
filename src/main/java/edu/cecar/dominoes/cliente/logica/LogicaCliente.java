@@ -6,9 +6,7 @@
 package edu.cecar.dominoes.cliente.logica;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
@@ -27,9 +25,11 @@ public class LogicaCliente {
 
     String ipServer = "127.0.0.1";
     int puerto = 5050;
-    String nombre;
+    String nombre="";
     ArrayList<JLabel> labels = new ArrayList<JLabel>();
     ArrayList<String> fichas = new ArrayList<String>();
+    private JLabel fichaSeleccionada;
+    private JLabel fichaABorar;
 
     Socket conexion;
 
@@ -102,21 +102,23 @@ public class LogicaCliente {
 
             label.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent ev) {
-                    
+
                     JLabel fichaJugada = new JLabel();
                     fichaJugada.setSize(80, 130);
                     fichaJugada.setName(label.getName());
                     System.out.println(label.getName());
-                    
+
                     fichaAjugar.removeAll();
-                    ImageIcon image = new ImageIcon("src/main/java/edu/cecar/dominoes/cliente/recursosGraficos/" +label.getName()+ ".jpg");
+                    ImageIcon image = new ImageIcon("src/main/java/edu/cecar/dominoes/cliente/recursosGraficos/" + label.getName() + ".jpg");
                     Icon icon = new ImageIcon(image.getImage().getScaledInstance(fichaJugada.getWidth(), fichaJugada.getHeight(), Image.SCALE_DEFAULT));
 
-                    //label.setIcon(new ImageIcon("src/main/java/edu/cecar/dominoes/cliente/recursosGraficos/" + fichasString[i] + ".jpg"));
                     fichaJugada.setIcon(icon);
                     fichaAjugar.add(fichaJugada);
                     fichaAjugar.revalidate();
                     fichaAjugar.repaint();
+
+                    fichaSeleccionada = fichaJugada;
+                    fichaABorar = label;
 
                 }
 
@@ -149,7 +151,68 @@ public class LogicaCliente {
 
         return resultado;
     }
-    
-    
+
+    public void mandarFichaIzquierda(String ficha, JPanel tablero) {
+        mandarMensaje(nombre, "jugarIzquierda", fichaSeleccionada.getName());
+        //mandarMensaje(nombre, "jugarIzquierda", ficha);
+        String radios = recivirMensaje();
+        if (!radios.equals("0")) {
+            fichaSeleccionada.setVisible(false);
+            fichaABorar.setVisible(false);
+
+            JLabel labelGuardar = new JLabelRotacion(fichaSeleccionada.getName(), radios);
+            System.out.println(labelGuardar.getSize().toString());
+            //labelGuardar.setSize(80, 130);
+            tablero.add(labelGuardar, 0);
+            //tablero.add(new JLabel("axczfvd"));
+            tablero.revalidate();
+            tablero.repaint();
+        } else {
+            System.out.println("ficha no posible");
+        }
+
+    }
+
+    public void mandarFichaDerecha(String ficha, JPanel tablero) {
+        mandarMensaje(nombre, "jugarDerecha", fichaSeleccionada.getName());
+        //mandarMensaje(nombre, "jugarIzquierda", ficha);
+        String radios = recivirMensaje();
+        if (!radios.equals("0")) {
+            fichaSeleccionada.setVisible(false);
+            fichaABorar.setVisible(false);
+
+            JLabel labelGuardar = new JLabelRotacion(fichaSeleccionada.getName(), radios);
+            System.out.println(labelGuardar.getSize().toString());
+            //labelGuardar.setSize(80, 130);
+            tablero.add(labelGuardar);
+            //tablero.add(new JLabel("axczfvd"));
+            tablero.revalidate();
+            tablero.repaint();
+        } else {
+            System.out.println("ficha no posible");
+        }
+
+    }
+
+    public void actualizacionJugada(JPanel panel) {
+        System.out.println("Actualizar nombre:"+nombre+":");
+        mandarMensaje(nombre, "actualizacionTablero", "" + panel.getComponents().length);
+        String[] fichas = recivirMensaje().split(";");
+        if (fichas[0].equals("1")) {
+            panel.removeAll();
+            for (int i = 1; i < fichas.length; i++) {
+                String[] ficha = fichas[i].split(",");
+                JLabel labelGuardar = new JLabelRotacion(ficha[0], ficha[1]);
+                panel.add(labelGuardar);                
+            }
+
+            panel.revalidate();
+            panel.repaint();
+            System.out.println("actualizacion");
+        }else{
+            System.out.println("no actualizada");
+        }
+
+    }
 
 }
