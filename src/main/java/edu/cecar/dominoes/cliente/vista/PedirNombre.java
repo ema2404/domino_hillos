@@ -6,11 +6,13 @@
 package edu.cecar.dominoes.cliente.vista;
 
 import edu.cecar.dominoes.cliente.logica.LogicaCliente;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class PedirNombre extends javax.swing.JDialog {
     String nombre;
     LogicaCliente logicaCliente;
+    JFrame frame;
     
 
     /**
@@ -18,6 +20,7 @@ public class PedirNombre extends javax.swing.JDialog {
      */
     public PedirNombre(java.awt.Frame parent, boolean modal,LogicaCliente logicaCliente) {
         super(parent, modal);
+        frame= (JFrame) parent;
         this.logicaCliente = logicaCliente;
         initComponents();
     }
@@ -108,7 +111,7 @@ public class PedirNombre extends javax.swing.JDialog {
       
         
 
-        if (logicaCliente.validarNombre(txtNombre.getText())) {
+        if (logicaCliente.validarNombre(txtNombre.getText(),frame)) {
             JOptionPane.showMessageDialog(rootPane, "Nombre gurdado");
             nombre = txtNombre.getText();           
             this.setVisible(false);
