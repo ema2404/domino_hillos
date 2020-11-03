@@ -548,11 +548,16 @@ public class Server {
     }
 
     private void validarCliente(String nombre) throws IOException {
-        if (!clientes.contains(new Cliente(nombre))) {
+        
+        if (!clientes.contains(new Cliente(nombre)) && clientes.size()<4) {
             clientes.add(new Cliente(nombre));
             salida.writeUTF("ok");
         } else {
-            salida.writeUTF("false");
+            if(clientes.size()>=4){
+            salida.writeUTF("maximo jugadores");
+            }else if(clientes.contains(new Cliente(nombre))){
+                salida.writeUTF("nombre ya usado");
+            }
         }
     }
 
