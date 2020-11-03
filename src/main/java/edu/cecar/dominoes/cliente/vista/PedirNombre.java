@@ -10,23 +10,24 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class PedirNombre extends javax.swing.JDialog {
+
     String nombre;
     LogicaCliente logicaCliente;
     JFrame frame;
-    
 
     /**
      * Creates new form PedirNombre
      */
-    public PedirNombre(java.awt.Frame parent, boolean modal,LogicaCliente logicaCliente) {
+    public PedirNombre(java.awt.Frame parent, boolean modal, LogicaCliente logicaCliente) {
         super(parent, modal);
-        frame= (JFrame) parent;
+        frame = (JFrame) parent;
         this.logicaCliente = logicaCliente;
         initComponents();
     }
     boolean ciclo = true;
-    public void romperEstadoServer(){
-        this.ciclo= false;
+
+    public void romperEstadoServer() {
+        this.ciclo = false;
     }
 
     /**
@@ -108,15 +109,14 @@ public class PedirNombre extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jbGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbGuardarActionPerformed
-      
-        
 
-        if (logicaCliente.validarNombre(txtNombre.getText(),frame)) {
+        String mensaje = logicaCliente.validarNombre(txtNombre.getText(), frame);
+        if (mensaje.equals("ok")) {
             JOptionPane.showMessageDialog(rootPane, "Nombre gurdado");
-            nombre = txtNombre.getText();           
+            nombre = txtNombre.getText();
             this.setVisible(false);
         } else {
-            JOptionPane.showMessageDialog(rootPane, "Nombre ya esta en uso");
+            JOptionPane.showMessageDialog(rootPane, mensaje);
         }
 
 
@@ -132,19 +132,18 @@ public class PedirNombre extends javax.swing.JDialog {
                     LogicaCliente logicaCliente = new LogicaCliente();
 
                     String[] mensajes = logicaCliente.estadoServer("").split(",");
-                   
 
                     if (mensajes[0].equals("1")) {
-                        jlEstadoSErver.setText("Estado del Server: Listo");
+                        jlEstadoSErver.setText("Estado del Server: Activo");
                         jlEstadoSErver.repaint();
-                        jbGuardar.setEnabled(true);                       
-                        txtNombre.setEditable(true); 
-                    } else {  
-                        jlEstadoSErver.setText("Estado del Server: "+mensajes[1]);
-                        jbGuardar.setEnabled(false);                        
+                        jbGuardar.setEnabled(true);
+                        txtNombre.setEditable(true);
+                    } else {
+                        jlEstadoSErver.setText("Estado del Server: " + mensajes[1]);
+                        jbGuardar.setEnabled(false);
                         txtNombre.setEditable(false);
                         jlEstadoSErver.repaint();
-                                              
+
                     }
 
                     Thread.sleep(3000);
@@ -152,13 +151,14 @@ public class PedirNombre extends javax.swing.JDialog {
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println("Conectando....");
+                    jlEstadoSErver.setText("Estado del Server: no activo");
+                    jbGuardar.setEnabled(false);
+                    txtNombre.setEditable(false);
+                    jlEstadoSErver.repaint();
                 }
-                
-            
 
             }
             this.dispose();
-           
 
         }).start();
 
@@ -168,7 +168,7 @@ public class PedirNombre extends javax.swing.JDialog {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         System.exit(0);
-        
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     public String getNombre() {

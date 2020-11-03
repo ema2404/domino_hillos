@@ -26,10 +26,10 @@ public class Juego extends javax.swing.JFrame {
         public void actionPerformed(ActionEvent e) {
             logicaCliente.ganador(a, ganador);
             if (!logicaCliente.isJuegoGanado()) {
-                
+
                 logicaCliente.actualizacionJugada(jpJuego);
                 logicaCliente.esMiTurno(notificarTurno, btnDerecha, btnPaso, btnIzquierda);
-            }else{
+            } else {
                 timerActualizar.stop();
                 logicaCliente.setJuegoGanado(false);
             }
@@ -243,12 +243,10 @@ public class Juego extends javax.swing.JFrame {
 
     private void ventanaAvierta(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_ventanaAvierta
 
-        
         timerActualizar.setRepeats(true);
         timerPreguntarTurno.setRepeats(true);
         logicaCliente.estadisticas(txtEstadisticas);
-        
-        
+
         PedirNombre nombre = new PedirNombre(this, rootPaneCheckingEnabled, logicaCliente);
         nombre.setLocationRelativeTo(this);
         nombre.setVisible(true);
@@ -288,6 +286,8 @@ public class Juego extends javax.swing.JFrame {
             JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
             logicaCliente.mandarFichaIzquierda(label.getName(), jpJuego, btnDerecha, btnPaso, btnIzquierda);
             jpFichaParaJugar.removeAll();
+            jpFichaParaJugar.revalidate();
+            jpFichaParaJugar.repaint();
         }
         //logicaCliente.mandarFichaIzquierda("0_0",jpJuego);        
         //logicaCliente.mandarFichaIzquierda("2_3");
@@ -302,6 +302,8 @@ public class Juego extends javax.swing.JFrame {
             JLabel label = (JLabel) jpFichaParaJugar.getComponent(0);
             logicaCliente.mandarFichaDerecha(label.getName(), jpJuego, btnDerecha, btnPaso, btnIzquierda);
             jpFichaParaJugar.removeAll();
+            jpFichaParaJugar.revalidate();
+            jpFichaParaJugar.repaint();
         }
     }//GEN-LAST:event_btnDerechaActionPerformed
 

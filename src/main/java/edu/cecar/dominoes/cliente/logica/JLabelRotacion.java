@@ -44,9 +44,9 @@ public class JLabelRotacion extends JLabel {
         Shape figura = graficoNuevo.getClip();
 
         double X = getWidth() / 2.0;
-        System.out.println("x: "+ X);
+        //System.out.println("x: "+ X);
         double Y = getHeight() / 2.0;
-        System.out.println("y: "+Y);
+        //System.out.println("y: "+Y);
 
         at.rotate(Math.toRadians(angulos), X, Y);
 

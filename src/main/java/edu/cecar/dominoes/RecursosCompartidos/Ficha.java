@@ -48,6 +48,10 @@ public class Ficha {
         return resultado;
     }
 
+    public boolean isCambioPos() {
+        return cambioPos;
+    }
+
     public String getRotacion() {
         return rotacion;
     }
@@ -87,9 +91,16 @@ public class Ficha {
 
     @Override
     public boolean equals(Object obj) {
+        if(obj instanceof Ficha){
+            Ficha ficha = (Ficha) obj;
+            return fichaCompleta().equals(ficha.getNumeroIzquierda() + "_" + ficha.getNumeroDerecha());
+        }else{
+            System.out.println("mo es instance");
+            return false;
+        }
 
-        Ficha ficha = (Ficha) obj;
-        return (numeroIzquierda + "_" + numeroDerecha).equals(ficha.getNumeroIzquierda() + "_" + ficha.getNumeroDerecha()); //To change body of generated methods, choose Tools | Templates.
+      
+         //To change body of generated methods, choose Tools | Templates.
     }
 
 }

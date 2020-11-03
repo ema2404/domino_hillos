@@ -5,7 +5,10 @@
  */
 package edu.cecar.dominoes.cliente.logica;
 
+import edu.cecar.dominoes.cliente.vista.Ganador;
+import edu.cecar.dominoes.cliente.vista.NotificarTurno;
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,20 +21,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 public class LogicaCliente {
 
     String ipServer = "127.0.0.1";
     int puerto = 5050;
-    String nombre="";
+    String nombre = "";
+    boolean fueNotificado = false;
+    boolean fueNotificadoGanador=false;
     ArrayList<JLabel> labels = new ArrayList<JLabel>();
     ArrayList<String> fichas = new ArrayList<String>();
     private JLabel fichaSeleccionada;
     private JLabel fichaABorar;
+    boolean juegoGanado=false;
 
     Socket conexion;
+    private int numMaxBloqueo =7;
 
     private boolean mandarMensaje(String nombre, String peticion, String mensaje) {
         boolean resultado = false;
@@ -63,15 +74,32 @@ public class LogicaCliente {
 
     }
 
-    public boolean validarNombre(String n) {
+    public void esMiTurno(NotificarTurno notificarTurno, JButton btn1, JButton btn2, JButton btn3) {
+        mandarMensaje(nombre, "turno", "");
+        if (recivirMensaje().equals("si") && !notificarTurno.isVisible() && !fueNotificado) {
+
+            notificarTurno.setLocationRelativeTo(null);
+            notificarTurno.setVisible(true);
+            fueNotificado = true;
+
+            btn1.setEnabled(true);
+            btn2.setEnabled(true);
+            btn3.setEnabled(true);
+        }
+        System.out.println(notificarTurno.isVisible());
+    }
+
+    public String validarNombre(String n, JFrame principal) {
 
         mandarMensaje(n, "validarNombre", n);
+        String respuesta = recivirMensaje();
 
-        if (recivirMensaje().equals("ok")) {
+        if (respuesta.equals("ok")) {
             this.nombre = n;
-            return true;
+            principal.setTitle("Jugador: " + n);
+            return "ok";
         } else {
-            return false;
+            return respuesta;
         }
 
     }
@@ -86,7 +114,7 @@ public class LogicaCliente {
 
         String[] fichasString = recivirMensaje().split(",");
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < numMaxBloqueo; i++) {
             JLabel label = new JLabel();
             label.setSize(80, 150);
             //label.setLocation(0, 0);
@@ -139,6 +167,11 @@ public class LogicaCliente {
         label.repaint();
     }
 
+    public void estadisticas(JTextArea area){
+        mandarMensaje(nombre, "estadisticas", "");
+        area.setText(recivirMensaje());
+    }
+    
     public void estoyListo() {
         System.out.println("Listo: " + nombre);
         mandarMensaje(nombre, "listo", "ok");
@@ -152,11 +185,13 @@ public class LogicaCliente {
         return resultado;
     }
 
-    public void mandarFichaIzquierda(String ficha, JPanel tablero) {
+    public void mandarFichaIzquierda(String ficha, JPanel tablero, JButton btn1, JButton btn2, JButton btn3) {
         mandarMensaje(nombre, "jugarIzquierda", fichaSeleccionada.getName());
         //mandarMensaje(nombre, "jugarIzquierda", ficha);
         String radios = recivirMensaje();
         if (!radios.equals("0")) {
+
+            fueNotificado = false;
             fichaSeleccionada.setVisible(false);
             fichaABorar.setVisible(false);
 
@@ -167,35 +202,46 @@ public class LogicaCliente {
             //tablero.add(new JLabel("axczfvd"));
             tablero.revalidate();
             tablero.repaint();
+
+            btn1.setEnabled(false);
+            btn2.setEnabled(false);
+            btn3.setEnabled(false);
         } else {
             System.out.println("ficha no posible");
+            JOptionPane.showMessageDialog(btn3, "jugada no permitida");
         }
 
     }
 
-    public void mandarFichaDerecha(String ficha, JPanel tablero) {
+    public void mandarFichaDerecha(String ficha, JPanel tablero, JButton btn1, JButton btn2, JButton btn3) {
         mandarMensaje(nombre, "jugarDerecha", fichaSeleccionada.getName());
         //mandarMensaje(nombre, "jugarIzquierda", ficha);
         String radios = recivirMensaje();
         if (!radios.equals("0")) {
+            fueNotificado = false;
             fichaSeleccionada.setVisible(false);
             fichaABorar.setVisible(false);
 
             JLabel labelGuardar = new JLabelRotacion(fichaSeleccionada.getName(), radios);
-            System.out.println(labelGuardar.getSize().toString());
+            //System.out.println(labelGuardar.getSize().toString());
             //labelGuardar.setSize(80, 130);
             tablero.add(labelGuardar);
             //tablero.add(new JLabel("axczfvd"));
             tablero.revalidate();
             tablero.repaint();
+
+            btn1.setEnabled(false);
+            btn2.setEnabled(false);
+            btn3.setEnabled(false);
         } else {
             System.out.println("ficha no posible");
+            JOptionPane.showMessageDialog(btn3, "jugada no permitida");
         }
 
     }
 
     public void actualizacionJugada(JPanel panel) {
-        System.out.println("Actualizar nombre:"+nombre+":");
+        //System.out.println("Actualizar nombre:" + nombre + ":");
         mandarMensaje(nombre, "actualizacionTablero", "" + panel.getComponents().length);
         String[] fichas = recivirMensaje().split(";");
         if (fichas[0].equals("1")) {
@@ -203,16 +249,59 @@ public class LogicaCliente {
             for (int i = 1; i < fichas.length; i++) {
                 String[] ficha = fichas[i].split(",");
                 JLabel labelGuardar = new JLabelRotacion(ficha[0], ficha[1]);
-                panel.add(labelGuardar);                
+                panel.add(labelGuardar);
             }
 
             panel.revalidate();
             panel.repaint();
             System.out.println("actualizacion");
-        }else{
+        } else {
             System.out.println("no actualizada");
         }
 
     }
 
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void paso(JButton btn1, JButton btn2, JButton btn3) {
+        mandarMensaje(nombre, "paso", "");
+        btn1.setEnabled(false);
+        btn2.setEnabled(false);
+        btn3.setEnabled(false);
+        
+        fueNotificado=false;
+    }
+    
+    public void ganador(Frame f, Ganador ganador){
+        mandarMensaje(nombre, "ganador", "");
+        String[] mensaje= recivirMensaje().split(",");
+        
+        if (mensaje[0].equals("1") && !fueNotificadoGanador) {
+             ganador = new Ganador(f, true,mensaje[1]);
+            
+
+            ganador.setLocationRelativeTo(null);
+            ganador.setVisible(true);
+            fueNotificadoGanador = true;
+            juegoGanado=true;
+ 
+
+            
+        }else{
+            System.out.println("no hay ganador");
+        }
+
+    }
+
+    public boolean isJuegoGanado() {
+        return juegoGanado;
+    }
+
+    public void setJuegoGanado(boolean juegoGanado) {
+        this.juegoGanado = juegoGanado;
+    }
+    
+    
 }

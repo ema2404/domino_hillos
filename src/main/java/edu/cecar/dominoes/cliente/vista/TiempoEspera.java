@@ -40,6 +40,7 @@ public class TiempoEspera extends javax.swing.JDialog {
     private void initComponents() {
 
         lbTiempo = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -53,6 +54,9 @@ public class TiempoEspera extends javax.swing.JDialog {
         lbTiempo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbTiempo.setText("jLabel1");
         getContentPane().add(lbTiempo, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 370, 40));
+
+        jLabel1.setText("posible llagada de un cuarto juugador, El juego inicia en: ");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 370, 50));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -98,6 +102,7 @@ public class TiempoEspera extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lbTiempo;
     // End of variables declaration//GEN-END:variables
 }
