@@ -46,7 +46,6 @@ public class Server {
     private boolean partidaGuardad = false;
     private int turno = 0;
     private int[] numerosUtilzados = {0, 0, 0, 0, 0, 0, 0};
-   
 
     ArrayList<Ficha> fichasEnMesa = new ArrayList<Ficha>();
 
@@ -65,99 +64,115 @@ public class Server {
 
     public void iniciar() {
         cargarPuntos();
-        /*
-        clientes.add(new Cliente("a"));
-        clientes.add(new Cliente("b"));
-        clientes.add(new Cliente("c"));
-        clientes.add(new Cliente("d"));
-         */
-
-        
 
         while (true) {
-
-            try {
-                clienteConexion = serverSocket.accept();
-
-                //System.out.println("llega el cliente");
-                entrada = new DataInputStream(clienteConexion.getInputStream());
-                salida = new DataOutputStream(clienteConexion.getOutputStream());
-
-                String[] datos = entrada.readUTF().split(",");
-                if (datos[1].equals("estado")) {
-                    salida.writeUTF(estadoServer());
-                }
-
-                if (permitirEntradaClientes(datos[0])) {
-
-                    switch (datos[1]) {
-                        case "validarNombre":
-                            validarCliente(datos[2]);
-                            break;
-
-                        case "fichas":
-                            if (datos[0].length() > 0) {
-                                fichas(datos[0]);
-                            }
-                            break;
-                        case "listo":
-                            if(datos[0].length()>0)
-                            listo(datos[0]);
-                            break;
-                        case "conectados":
-                            if(datos[0].length()>0)
-                            conectados();
-                            break;
-                        case "tiempoDeEspera":
-                            if(datos[0].length()>0)
-                            tiempoDeEspera();
-                            break;
-                        case "jugarIzquierda":
-                            if(datos[0].length()>0)
-                            jugarIzquierda(datos[0], datos[2]);
-
-                            break;
-                        case "jugarDerecha":
-                            if(datos[0].length()>0)
-                            jugarDerecha(datos[0], datos[2]);
-
-                            break;
-                        case "actualizacionTablero":
-                            System.out.println("Actulizar juego: tam:"+datos[0].length()+" palabra: "+datos[0]);
-                            if (datos[0].length() > 0) {
-                                actualizarMeza(datos[0], datos[2]);
-                            }
-                            break;
-                        case "turno":
-                            if (datos[0].length() > 0) {
-                                esMiTurno(datos[0]);
-                            }
-                            break;
-                        case "paso":
-                            if(datos[0].length()>0)
-                            paso();
-
-                            break;
-                        case "ganador":
-                            if (datos[0].length() > 0) {
-                                ganador();
-                            }
-
-                            break;
-                        case "estadisticas":
-                            staticasPlanas();
-                            break;
-                    }
-                } else {
-                    salida.writeUTF("error al enviar datos");
-
-                }
-
-            } catch (Exception ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            try{
+                 System.out.println("entraa");
+            clienteConexion = serverSocket.accept();
+            
+            //se crean los hilos por cada peticiones de los clientes
+            Runnable runnable = () -> {
+               
+                logica();
+            };
+            
+            new Thread(runnable).start();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
         }
 
+    }
+
+    private void logica() {
+
+        try {
+            
+
+            //System.out.println("llega el cliente");
+            entrada = new DataInputStream(clienteConexion.getInputStream());
+            salida = new DataOutputStream(clienteConexion.getOutputStream());
+
+            String[] datos = entrada.readUTF().split(",");
+            if (datos[1].equals("estado")) {
+                salida.writeUTF(estadoServer());
+            }
+
+            if (permitirEntradaClientes(datos[0])) {
+
+                switch (datos[1]) {
+                    case "validarNombre":
+                        validarCliente(datos[2]);
+                        break;
+
+                    case "fichas":
+                        if (datos[0].length() > 0) {
+                            fichas(datos[0]);
+                        }
+                        break;
+                    case "listo":
+                        if (datos[0].length() > 0) {
+                            listo(datos[0]);
+                        }
+                        break;
+                    case "conectados":
+                        if (datos[0].length() > 0) {
+                            conectados();
+                        }
+                        break;
+                    case "tiempoDeEspera":
+                        if (datos[0].length() > 0) {
+                            tiempoDeEspera();
+                        }
+                        break;
+                    case "jugarIzquierda":
+                        if (datos[0].length() > 0) {
+                            jugarIzquierda(datos[0], datos[2]);
+                        }
+
+                        break;
+                    case "jugarDerecha":
+                        if (datos[0].length() > 0) {
+                            jugarDerecha(datos[0], datos[2]);
+                        }
+
+                        break;
+                    case "actualizacionTablero":
+                        System.out.println("Actulizar juego: tam:" + datos[0].length() + " palabra: " + datos[0]);
+                        if (datos[0].length() > 0) {
+                            actualizarMeza(datos[0], datos[2]);
+                        }
+                        break;
+                    case "turno":
+                        if (datos[0].length() > 0) {
+                            esMiTurno(datos[0]);
+                        }
+                        break;
+                    case "paso":
+                        if (datos[0].length() > 0) {
+                            paso();
+                        }
+
+                        break;
+                    case "ganador":
+                        if (datos[0].length() > 0) {
+                            ganador();
+                        }
+
+                        break;
+                    case "estadisticas":
+                        staticasPlanas();
+                        break;
+                }
+            } else {
+                salida.writeUTF("error al enviar datos");
+
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void esMiTurno(String nombre) throws IOException {
@@ -548,14 +563,14 @@ public class Server {
     }
 
     private void validarCliente(String nombre) throws IOException {
-        
-        if (!clientes.contains(new Cliente(nombre)) && clientes.size()<4) {
+
+        if (!clientes.contains(new Cliente(nombre)) && clientes.size() < 4) {
             clientes.add(new Cliente(nombre));
             salida.writeUTF("ok");
         } else {
-            if(clientes.size()>=4){
-            salida.writeUTF("maximo jugadores");
-            }else if(clientes.contains(new Cliente(nombre))){
+            if (clientes.size() >= 4) {
+                salida.writeUTF("maximo jugadores");
+            } else if (clientes.contains(new Cliente(nombre))) {
                 salida.writeUTF("nombre ya usado");
             }
         }
@@ -881,12 +896,12 @@ public class Server {
     }
 
     private void staticasPlanas() throws IOException {
-        String resultado ="";
-        
+        String resultado = "";
+
         for (Cliente cl : puntosTodosclientes) {
-             resultado +="jugador: " + cl.getNombre() + " ganadas: " + cl.getGanadas() + " perdidas: " + cl.getPerdidas()+"\n";
+            resultado += "jugador: " + cl.getNombre() + " ganadas: " + cl.getGanadas() + " perdidas: " + cl.getPerdidas() + "\n";
         }
-        
+
         /*puntosTodosclientes.forEach((Cliente cl) -> {
             System.out.println("cliente: " + cl.getNombre() + " ganadas: " + cl.getGanadas() + " perdidas: " + cl.getPerdidas());
            

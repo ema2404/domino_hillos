@@ -30,7 +30,7 @@ import javax.swing.JTextArea;
 
 public class LogicaCliente {
 
-    String ipServer = "192.168.1.26";
+    String ipServer = "127.0.0.1";
     int puerto = 5050;
     String nombre = "";
     boolean fueNotificado = false;
